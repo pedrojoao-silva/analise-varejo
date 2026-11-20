@@ -32,17 +32,21 @@ ORDER BY valor, nome;
 def extremos(itens, formatar):
     menor = itens[0][1]
     maior = itens[-1][1]
-    return [
-        f"{rotulo}: {', '.join(nome for nome, valor in itens if valor == limite)}"
-        f" ({formatar(limite)})"
-        for rotulo, limite in (("Maior", maior), ("Menor", menor))
-    ]
+    resumo = []
+    for rotulo, limite in (("Maior", maior), ("Menor", menor)):
+        empatados = [nome for nome, valor in itens if valor == limite]
+        nomes = ", ".join(empatados[:5])
+        if len(empatados) > 5:
+            nomes += f" e mais {len(empatados) - 5} em empate"
+        resumo.append(f"{rotulo}: {nomes} ({formatar(limite)})")
+    return resumo
 
 
 def formatar_libras(unidades):
     inteiro, fracao = divmod(unidades, 10_000)
-    reais = f"{inteiro:,}".replace(",", ".")
-    return f"£{reais},{fracao:04d}"
+    libras = f"{inteiro:,}".replace(",", ".")
+    decimais = f"{fracao:04d}".rstrip("0").ljust(2, "0")
+    return f"£{libras},{decimais}"
 
 
 def main():
@@ -80,7 +84,7 @@ def main():
             *extremos(paises, formatar_libras),
         ])
         if primeira[:10] > inicio.isoformat() or ultima[:10] < (fim - timedelta(days=1)).isoformat():
-            mensagem.extend(["", "O período contém dados parciais na base importada."])
+            mensagem.extend(["", f"As datas na base vão de {primeira[:10]} a {ultima[:10]}."])
     else:
         mensagem.append("A base importada não contém vendas válidas para este mês.")
 

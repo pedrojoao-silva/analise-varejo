@@ -33,6 +33,6 @@ Depois de importar a planilha, execute `python3 relatorio.py` no dia 10. O progr
 python3 relatorio.py --data 2011-12-10
 ```
 
-O ranking de produtos usa unidades vendidas. O de países usa faturamento bruto. Os extremos consideram apenas produtos e países com vendas válidas no período e incluem todos os empates. A base da UCI tem registros históricos, sem dados de vendedor ou estado. Para gerar rankings atuais dessas duas dimensões, a fonte de vendas precisa conter a data, o identificador do vendedor e o estado de cada venda.
+O ranking de produtos usa unidades vendidas. O de países usa faturamento bruto. Os extremos consideram apenas produtos e países com vendas válidas no período e contabilizam todos os empates, mostrando até cinco nomes por extremo. A base da UCI tem registros históricos, sem dados de vendedor ou estado. Para gerar rankings atuais dessas duas dimensões, a fonte de vendas precisa conter a data, o identificador do vendedor e o estado de cada venda.
 
 O script gera um rascunho local para revisão. Para executá-lo automaticamente no dia 10, é preciso configurar um agendador no computador.
