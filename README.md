@@ -5,10 +5,11 @@ O projeto importa vendas para um banco SQLite local. Uma consulta SQL calcula o 
 ## Rodar com dados fictícios
 
 ```bash
-python3 analise.py dados/amostra.csv
+python3 analise.py dados/amostra.csv --banco amostra.sqlite3
+python3 relatorio.py --mes 2011-01 --banco amostra.sqlite3
 ```
 
-O script cria o arquivo `varejo.sqlite3`. A amostra tem cinco linhas e gera £13.50 em janeiro e £12.00 em fevereiro. O banco guarda todas as linhas. A consulta exclui cancelamentos, quantidades não positivas e preços não positivos para calcular o faturamento bruto. Cada importação substitui os dados da tabela `vendas` por inteiro em uma transação.
+O exemplo cria um banco separado em `amostra.sqlite3`. A amostra tem cinco linhas e gera £13.50 em janeiro e £12.00 em fevereiro. O banco guarda todas as linhas. A consulta exclui cancelamentos, quantidades não positivas e preços não positivos para calcular o faturamento bruto. Uma importação válida substitui a tabela `vendas` em uma transação. Se o arquivo não tiver vendas ou contiver uma linha inválida, o banco anterior é preservado.
 
 ## Importar as vendas reais
 
@@ -27,12 +28,45 @@ Fonte dos dados reais: Daqing Chen, *Online Retail* (2015), UCI Machine Learning
 
 ## Relatório mensal para a diretoria
 
-Depois de importar a planilha, execute `python3 relatorio.py` no dia 10. O programa consulta o mês anterior, mostra os resultados no terminal e salva um rascunho em `relatorios/email-AAAA-MM.txt`. Para simular 10 de dezembro de 2011 e analisar novembro de 2011, execute:
+Depois de importar a planilha, escolha um mês para gerar um relatório sob demanda:
 
 ```bash
-python3 relatorio.py --data 2011-12-10
+python3 relatorio.py --mes 2011-11
 ```
 
-O ranking de produtos usa unidades vendidas. O de países usa faturamento bruto. Os extremos consideram apenas produtos e países com vendas válidas no período e contabilizam todos os empates, mostrando até cinco nomes por extremo. A base da UCI tem registros históricos, sem dados de vendedor ou estado. Para gerar rankings atuais dessas duas dimensões, a fonte de vendas precisa conter a data, o identificador do vendedor e o estado de cada venda.
+O relatório aparece no terminal e o rascunho fica em `relatorios/email-AAAA-MM.txt`. Para o fluxo agendado, configure o agendador do computador para executar `python3 relatorio.py` no dia 10 de cada mês. Sem opções, o script verifica o dia e consulta o mês anterior. Use `--data 2011-12-10` para simular uma execução desse fluxo.
 
-O script gera um rascunho local para revisão. Para executá-lo automaticamente no dia 10, é preciso configurar um agendador no computador.
+### Exemplo com os dados reais
+
+```text
+Assunto: Resultado de vendas de 2011-11
+
+Faturamento bruto: £1.509.496,33
+Pedidos: 2769
+Ticket médio: £545,14
+Variação do faturamento frente a 2011-10: +30,7%
+
+Produto com mais unidades: RABBIT NIGHT LIGHT (23084), 14.954 unidades
+País com maior faturamento: United Kingdom, £1.325.346,21
+```
+
+![Gráfico do faturamento bruto mensal. Novembro de 2011 é o pico e dezembro de 2011 tem cobertura parcial.](docs/faturamento-mensal.png)
+
+- Novembro de 2011 teve o maior faturamento bruto observado, **£1,51 milhão**, com alta de **30,7%** frente a outubro.
+- O Reino Unido respondeu por cerca de **88%** do faturamento de novembro, mostrando a concentração das vendas naquele mercado.
+
+### Como os indicadores são calculados
+
+O faturamento bruto soma quantidade × preço das vendas válidas. A regra de validade está em `vendas_validas.sql` e é usada pelo resumo mensal e pelo relatório. No cliente SQLite, execute esse arquivo na mesma conexão antes de executar `consultas.sql`.
+
+Pedidos são faturas distintas com pelo menos uma venda válida. O ticket médio divide o faturamento bruto pelo número de pedidos. A variação mensal é exibida quando ambos os meses estão dentro do intervalo de datas observado na base e o mês anterior tem faturamento positivo. Esse intervalo não garante que não haja lacunas dentro dele. Dezembro de 2011 tem dados só até o dia 9.
+
+O relatório traz os cinco primeiros produtos por unidades e países por faturamento, além dos extremos. Empates nos extremos são contabilizados, com até cinco nomes exibidos em cada extremo. Quando um código tem múltiplas descrições no mês, o relatório exibe a primeira descrição não vazia em ordem lexicográfica. A base histórica não fornece vendedor ou estado.
+
+## Testes
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+Os testes usam arquivos temporários e não dependem da planilha oficial. O GitHub Actions executa a mesma suíte em pushes e pull requests.
