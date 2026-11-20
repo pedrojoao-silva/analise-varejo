@@ -1,0 +1,6 @@
+InvoiceNo,StockCode,Description,Quantity,InvoiceDate,UnitPrice,CustomerID,Country
+100001,A1,Caneca,2,2011-01-03 12:00:00,5.25,100,United Kingdom
+100001,A2,Caderno,1,2011-01-03 12:00:00,3.00,100,United Kingdom
+100002,A2,Caderno,4,2011-02-08 14:00:00,3.00,,France
+C100003,A1,Caneca,-1,2011-02-12 11:00:00,5.25,100,United Kingdom
+100004,A3,Amostra,1,2011-02-12 14:00:00,0,101,France
